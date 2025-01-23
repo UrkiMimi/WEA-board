@@ -3,6 +3,7 @@ import requests
 import time
 import os
 import pygame
+import traceback
 
 # TODO 1: Seperate python file so its easier to debug.
 
@@ -79,7 +80,8 @@ while True:
     except:
         # bruh
         os.system("clear")
-        print("JSON isn't valid.")
+        print("JSON isn't valid. \nFull error:\n")
+        traceback.print_exc()
 
     # refresh part 2
     taskStopTime = time.time()
