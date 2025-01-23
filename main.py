@@ -1,9 +1,9 @@
 import json
-import requests
 import time
 import os
 import pygame
 import traceback
+from functions import *
 
 # TODO 1: Seperate python file so its easier to debug.
 
@@ -14,43 +14,8 @@ oldAlerts = []
 
 #audio manager
 pygame.mixer.init()
-snd = pygame.mixer.Sound("tock.wav")
+snd = pygame.mixer.Sound("assets/tock.wav")
 
-
-
-# region functions
-# TODO 2: Fix bug that only gets one alert when several are being broadcast.
-# returns http response in text
-def get_request(url):
-    response = requests.get(url)
-    time.sleep(0.5)
-
-    if response.status_code == 200:
-        return response.text
-    else:
-        return "Response failed with code: " + str(response.status_code)
-
-# returns alerts from compatible json
-def wea_to_array(jsn):
-    array = []
-    headline = ""
-    shortTxt = ""
-
-    # loop to get alerts from json
-    for alert in jsn["alerts"]:
-        
-        # loop to get alert headlines and WEA 90 Text from alert
-        for text in alert["texts"]:
-            if text["type"] == "cap_headline":
-                headline = text["value"]
-            if text["type"] == "cmac_short_text":
-                shortTxt = text["value"]
-        
-        # Add alert to array
-        array.append(alert["event"] + " - " + headline + "\n  " + shortTxt)
-
-    # Return alerts
-    return array
 
 
 # region main loop
@@ -67,9 +32,9 @@ while True:
 
         # push alerts to console
         os.system("clear")
-        print("Active alerts: \n ")
+        print(Fore.BLUE + "Active alerts: \n ")
         for i in range(len(alerts)): # loop for pushing alerts to console
-            print(str(i+1) + ". " + alerts[i])
+            print(Fore.RESET + str(i+1) + ". " + alerts[i])
         
         # make sound if new alert is added to alert board
         if oldAlerts != alerts:
@@ -80,10 +45,16 @@ while True:
     except:
         # bruh
         os.system("clear")
-        print("JSON isn't valid. \nFull error:\n")
+        print(Fore.RED) # change text coolor to red
         traceback.print_exc()
+        break
 
     # refresh part 2
     taskStopTime = time.time()
     print("\nTime to process: " + str(round(taskStopTime - taskStartTime,3)))
+
+    # stopgap to set refresh speed to 1 if its shorter than a second
+    if refresh_time <= 1:
+        refresh_time = 1
+    
     time.sleep(refresh_time)
