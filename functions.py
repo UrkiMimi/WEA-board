@@ -2,7 +2,7 @@
 import requests
 import time
 from colorama import *
-from datetime import datetime
+from datetime import datetime, timezone
 
 # returns http get request in text
 def get_request(url):
@@ -21,12 +21,16 @@ def convert_timestamp(timestamp):
     # return the formatted timestamp which is "MM-DD HH:MM:SS"
     return dTime.strftime("%m-%d %H:%M:%S")
 
-# TODO 2: Fix bug that only gets one alert when several are being broadcast.
+# ~~Fix bug that only gets one alert when several are being broadcast.~~
+# Comment above can't be fixed as its an API issue ^
+
 # returns alerts from compatible json
 def wea_to_array(jsn):
+    #vars
     array = []
     headline = ""
     shortTxt = ""
+    date = datetime.now(timezone.utc)
 
     # loop to get alerts from json
     for alert in jsn["alerts"]:
@@ -38,8 +42,11 @@ def wea_to_array(jsn):
             if text["type"] == "cmac_short_text":
                 shortTxt = text["value"]
         
-        # Add alert to array
-        array.append(alert["event"] + " - " + headline + "\n   " + shortTxt + "\n   Time sent: " + convert_timestamp(alert["sent"]) + "\n")
+        # check if alert has expired to mitigate the api bug
+        if date.timestamp() <= datetime.fromisoformat(alert["expires"]).timestamp():
+            # push alert to array
+            array.append(alert["event"] + " - " + headline + "\n   " + shortTxt + "\n   Time sent: " + convert_timestamp(alert["sent"]) + "\n")
+            
 
     # Return alerts
     return array
