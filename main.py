@@ -3,13 +3,12 @@ import time
 import os
 import pygame
 import traceback
+import sys
 from functions import *
-
-# TODO 1: Seperate python file so its easier to debug.
 
 # region vars
 json_url = "https://nmknkohb83.execute-api.us-east-1.amazonaws.com/prod/warn_out/?status=active"
-refresh_time = 5
+refresh_time = 15
 oldAlerts = []
 
 #audio manager
@@ -42,6 +41,12 @@ while True:
 
         # refresh part 1
         oldAlerts = alerts
+
+        # region arguments
+        #break if --once argument is specified
+        if "--once" in sys.argv:
+            break
+
     except:
         # bruh
         os.system("clear")
@@ -56,5 +61,5 @@ while True:
     # stopgap to set refresh speed to 1 if its shorter than a second
     if refresh_time <= 1:
         refresh_time = 1
-    
+        
     time.sleep(refresh_time)
